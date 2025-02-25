@@ -1,67 +1,160 @@
+import Image from 'next/image';
 import Link from 'next/link';
 
-import FooterMenu from 'components/layout/footer-menu';
-import LogoSquare from 'components/logo-square';
-import { getMenu } from 'lib/sylius';
-import { Suspense } from 'react';
+const currentYear = new Date().getFullYear();
 
-const { COMPANY_NAME, SITE_NAME } = process.env;
-
-export default async function Footer() {
-  const currentYear = new Date().getFullYear();
-  const copyrightDate = 2023 + (currentYear > 2023 ? `-${currentYear}` : '');
-  const skeleton = 'w-full h-6 animate-pulse rounded bg-neutral-200 dark:bg-neutral-700';
-  const menu = await getMenu();
-  const copyrightName = COMPANY_NAME || SITE_NAME || '';
-
+export default function Footer() {
   return (
-    <footer className="text-sm text-neutral-500 dark:text-neutral-400">
-      <div className="mx-auto flex w-full max-w-7xl flex-col gap-6 border-t border-neutral-200 px-6 py-12 text-sm md:flex-row md:gap-12 md:px-4 min-[1320px]:px-0 dark:border-neutral-700">
-        <div>
-          <Link className="flex items-center gap-2 text-black md:pt-1 dark:text-white" href="/">
-            <LogoSquare size="sm" />
-            <span className="uppercase">{SITE_NAME}</span>
-          </Link>
+    <footer
+      className="relative bg-black text-white"
+      style={{
+        backgroundImage: "url('/footer-background.jpg')",
+        backgroundSize: 'cover',
+        backgroundPosition: 'center'
+      }}
+    >
+      {/* Overlay sombre pour rendre le texte plus lisible */}
+      <div className="absolute inset-0 bg-black opacity-80"></div>
+
+      <div className="relative mx-auto max-w-7xl px-6 py-12">
+        {/* Logo + À propos */}
+        <div className="mb-8 flex flex-col items-center text-center">
+          <Image src="/logo.png" alt="Ooredoo Logo" width={150} height={50} />
+          <h2 className="mt-4 text-lg font-bold">À PROPOS DE NOUS</h2>
         </div>
-        <Suspense
-          fallback={
-            <div className="flex h-[188px] w-[200px] flex-col gap-2">
-              <div className={skeleton} />
-              <div className={skeleton} />
-              <div className={skeleton} />
-              <div className={skeleton} />
-              <div className={skeleton} />
-              <div className={skeleton} />
+
+        {/* Sections du footer */}
+        <div className="grid grid-cols-1 gap-8 text-center sm:grid-cols-2 md:grid-cols-4 md:text-left">
+          {/* Colonne Particulier */}
+          <div>
+            <h3 className="text-lg font-semibold">PARTICULIER</h3>
+            <ul className="mt-4 space-y-2">
+              <li>
+                <Link href="/accueil" className="hover:underline">
+                  Accueil
+                </Link>
+              </li>
+              <li>
+                <Link href="/mobile" className="hover:underline">
+                  Mobile
+                </Link>
+              </li>
+              <li>
+                <Link href="/internet" className="hover:underline">
+                  Internet
+                </Link>
+              </li>
+              <li>
+                <Link href="/self-service" className="hover:underline">
+                  Self-service
+                </Link>
+              </li>
+              <li>
+                <Link href="/assistance" className="hover:underline">
+                  Assistance
+                </Link>
+              </li>
+            </ul>
+          </div>
+
+          {/* Colonne Professionnel */}
+          <div>
+            <h3 className="text-lg font-semibold">PROFESSIONNEL</h3>
+            <ul className="mt-4 space-y-2">
+              <li>
+                <Link href="/accueil" className="hover:underline">
+                  Accueil
+                </Link>
+              </li>
+              <li>
+                <Link href="/pme-pmi" className="hover:underline">
+                  PME-PMI
+                </Link>
+              </li>
+              <li>
+                <Link href="/entreprises" className="hover:underline">
+                  Entreprises
+                </Link>
+              </li>
+              <li>
+                <Link href="/assistance" className="hover:underline">
+                  Assistance
+                </Link>
+              </li>
+            </ul>
+          </div>
+
+          {/* Colonne Infos Utiles */}
+          <div>
+            <h3 className="text-lg font-semibold">INFOS UTILES</h3>
+            <ul className="mt-4 space-y-2">
+              <li>
+                <Link href="/contact" className="hover:underline">
+                  Nous contacter
+                </Link>
+              </li>
+              <li>
+                <Link href="/about" className="hover:underline">
+                  À propos de nous
+                </Link>
+              </li>
+              <li>
+                <Link href="/privacy" className="hover:underline">
+                  Données personnelles
+                </Link>
+              </li>
+              <li>
+                <Link href="/report" className="hover:underline">
+                  Signalement
+                </Link>
+              </li>
+            </ul>
+          </div>
+
+          {/* Colonne My Ooredoo App */}
+          <div className="text-center md:text-left">
+            <h3 className="text-lg font-semibold">MY OOREEDOO APP</h3>
+            <div className="mt-4 space-y-2">
+              <Link href="https://apps.apple.com" target="_blank">
+                <Image src="/app_store.png" alt="App Store" width={150} height={50} />
+              </Link>
+              <Link href="https://play.google.com" target="_blank">
+                <Image src="/google play.png" alt="Google Play" width={150} height={50} />
+              </Link>
+              <Link href="https://appgallery.huawei.com" target="_blank">
+                <Image src="/huawei.png" alt="App Gallery" width={150} height={50} />
+              </Link>
             </div>
-          }
-        >
-          <FooterMenu menu={menu} />
-        </Suspense>
-        <div className="md:ml-auto">
-          <a
-            className="flex h-8 w-max flex-none items-center justify-center rounded-md border border-neutral-200 bg-white text-xs text-black dark:border-neutral-700 dark:bg-black dark:text-white"
-            aria-label="Deploy on Vercel"
-            href="https://vercel.com/templates/next.js/nextjs-commerce"
-          >
-            <span className="px-3">▲</span>
-            <hr className="h-full border-r border-neutral-200 dark:border-neutral-700" />
-            <span className="px-3">Deploy</span>
-          </a>
+          </div>
         </div>
-      </div>
-      <div className="border-t border-neutral-200 py-6 text-sm dark:border-neutral-700">
-        <div className="mx-auto flex w-full max-w-7xl flex-col items-center gap-1 px-4 md:flex-row md:gap-0 md:px-4 min-[1320px]:px-0">
-          <p>
-            &copy; {copyrightDate} {copyrightName}
-            {copyrightName.length && !copyrightName.endsWith('.') ? '.' : ''} All rights reserved.
+
+        {/* Lignes et icônes sociales */}
+        <div className="relative mt-8 flex flex-col items-center justify-between border-t border-gray-700 pt-6 md:flex-row">
+          <p className="text-center text-sm md:text-left">
+            &copy; {currentYear} Ooredoo. Tous droits réservés.
           </p>
-          <hr className="mx-4 hidden h-4 w-[1px] border-l border-neutral-400 md:inline-block" />
-          <p>Designed in California</p>
-          <p className="md:ml-auto">
-            <a href="https://vercel.com" className="text-black dark:text-white">
-              Crafted by ▲ Vercel
-            </a>
-          </p>
+
+          {/* Icônes sociales */}
+          <div className="mt-4 flex space-x-4 md:mt-0">
+            <Link href="https://facebook.com" target="_blank">
+              <Image src="/facebook.png" alt="Facebook" width={24} height={24} />
+            </Link>
+            <Link href="https://x.com/" target="_blank">
+              <Image src="/twitter.png" alt="Twitter" width={24} height={24} />
+            </Link>
+            <Link href="https://youtube.com" target="_blank">
+              <Image src="/youtube.png" alt="YouTube" width={24} height={24} />
+            </Link>
+            <Link href="https://pinterest.com" target="_blank">
+              <Image src="/pinterest.png" alt="Pinterest" width={24} height={24} />
+            </Link>
+            <Link href="https://www.instagram.com/" target="_blank">
+              <Image src="/instagram.png" alt="Instagram" width={24} height={24} />
+            </Link>
+            <Link href="https://linkedin.com" target="_blank">
+              <Image src="/linkedin.png" alt="LinkedIn" width={24} height={24} />
+            </Link>
+          </div>
         </div>
       </div>
     </footer>
