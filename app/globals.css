@@ -2,20 +2,19 @@
 @tailwind components;
 @tailwind utilities;
 
-@media (prefers-color-scheme: dark) {
-  html {
-    color-scheme: dark;
-  }
+/* Forcer l’application des styles de mode clair et sombre */
+html {
+  background-color: white !important;
+  color: black !important;
+  @apply transition-colors duration-300;
 }
 
-@supports (font: -apple-system-body) and (-webkit-appearance: none) {
-  img[loading='lazy'] {
-    clip-path: inset(0.6px);
-  }
+html.dark {
+  background-color: black !important;
+  color: white !important;
 }
 
-a,
-input,
-button {
-  @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-400 focus-visible:ring-offset-2 focus-visible:ring-offset-neutral-50 dark:focus-visible:ring-neutral-600 dark:focus-visible:ring-offset-neutral-900;
+html.light {
+  background-color: white !important;
+  color: black !important;
 }
