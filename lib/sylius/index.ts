@@ -12,8 +12,9 @@ import {
   UpdateCartPayload
 } from './types';
 
-const DOMAIN = `${process.env.NEXT_PUBLIC_SYLIUS_BACKEND_API}`;
-const ENDPOINT = `${DOMAIN}${SYLIUS_API_ENDPOINT}`;
+const DOMAIN = process.env.NEXT_PUBLIC_SYLIUS_BACKEND_API?.replace(/\/$/, ''); // Supprime le / final s'il existe
+const ENDPOINT = `${DOMAIN}${SYLIUS_API_ENDPOINT}`.replace(/\/$/, ''); // Supprime le / final s'il existe
+console.log('🌍 Sylius API Endpoint:', ENDPOINT);
 
 // Fetch
 export default async function syliusRequest(
@@ -36,8 +37,10 @@ export default async function syliusRequest(
 
   try {
     const result = await fetch(`${ENDPOINT}${path}`, options);
-
     const body = await result.json();
+
+    console.log(`📢 Fetching from Sylius: ${method} ${ENDPOINT}${path}`);
+    console.log('✅ API Raw Response:', body);
 
     if (body.errors) {
       throw body.errors[0];
@@ -48,9 +51,8 @@ export default async function syliusRequest(
       body
     };
   } catch (e) {
-    throw {
-      error: e
-    };
+    console.error('❌ API Request Failed:', e);
+    throw { error: e };
   }
 }
 
@@ -68,10 +70,6 @@ export const getProducts = async (payload: GetProductsPayload) => {
 
   if (payload.sortKey) {
     switch (payload.sortKey) {
-      case 'RELEVANCE':
-        break;
-      case 'BEST_SELLING':
-        break;
       case 'CREATED_AT':
         url.searchParams.set('order[createdAt]', orderBy);
         break;
@@ -84,42 +82,40 @@ export const getProducts = async (payload: GetProductsPayload) => {
   }
 
   const data = await syliusRequest(REST_METHODS.GET, '/products' + url.search);
-  const syliusProducts = data.body;
-  const products = syliusProducts.map((syliusProduct: SyliusProduct) =>
-    normalizeProduct(syliusProduct)
-  );
-  return products;
+  console.log('📌 API Response for Products:', data.body);
+
+  if (!Array.isArray(data.body)) {
+    console.error('🚨 Products response is not an array:', data.body);
+    return [];
+  }
+
+  return data.body.map((syliusProduct: SyliusProduct) => normalizeProduct(syliusProduct));
 };
 
 export const getProduct = async (slug: string) => {
   const data = await syliusRequest(REST_METHODS.GET, '/products-by-slug/' + slug);
-
-  const syliusProduct = data.body;
-  const product = normalizeProduct(syliusProduct);
-
-  return product;
+  console.log('📌 API Response for Product:', data.body);
+  return normalizeProduct(data.body);
 };
-export const getProductRecommendations = () => {
-  return [];
-};
+
+// Collections
 export const getCollections = async (): Promise<Collection[]> => {
   const data = await syliusRequest(REST_METHODS.GET, '/taxons');
 
-  const syliusTaxons = data.body;
-  const collections = syliusTaxons.map((syliusTaxon: SyliusTaxon) =>
-    normalizeCollection(syliusTaxon)
-  );
+  console.log('📌 API Response for Taxons:', data.body);
 
-  return collections;
+  if (!Array.isArray(data.body)) {
+    console.error("🚨 syliusTaxons n'est pas un tableau, API response:", data.body);
+    return [];
+  }
+
+  return data.body.map((syliusTaxon: SyliusTaxon) => normalizeCollection(syliusTaxon));
 };
 
 export const getCollection = async (taxonCode: string) => {
   const data = await syliusRequest(REST_METHODS.GET, '/taxons/' + taxonCode);
-
-  const syliusTaxon = data.body;
-  const collection = normalizeCollection(syliusTaxon);
-
-  return collection;
+  console.log('📌 API Response for Collection:', data.body);
+  return normalizeCollection(data.body);
 };
 
 export const getCollectionProducts = async (payload: GetCollectionProductsPayload) => {
@@ -131,10 +127,6 @@ export const getCollectionProducts = async (payload: GetCollectionProductsPayloa
 
   if (payload.sortKey) {
     switch (payload.sortKey) {
-      case 'RELEVANCE':
-        break;
-      case 'BEST_SELLING':
-        break;
       case 'CREATED_AT':
         url.searchParams.set('order[createdAt]', orderBy);
         break;
@@ -147,31 +139,34 @@ export const getCollectionProducts = async (payload: GetCollectionProductsPayloa
   }
 
   const data = await syliusRequest(REST_METHODS.GET, '/products' + url.search);
-  const syliusProducts = data.body;
-  const products = syliusProducts.map((syliusProduct: SyliusProduct) =>
-    normalizeProduct(syliusProduct)
-  );
-  return products;
+  console.log('📌 API Response for Collection Products:', data.body);
+
+  if (!Array.isArray(data.body)) {
+    console.error("🚨 syliusProducts n'est pas un tableau, API response:", data.body);
+    return [];
+  }
+
+  return data.body.map((syliusProduct: SyliusProduct) => normalizeProduct(syliusProduct));
 };
 
 // Cart
 export const createCart = async (): Promise<Cart> => {
   const data = await syliusRequest(REST_METHODS.POST, '/orders', { localeCode: 'fr_FR' });
-  const syliusCart = data.body;
-
-  return normalizeCart(syliusCart);
+  return normalizeCart(data.body);
 };
+
 export const getCart = async (cartId: string): Promise<Cart> => {
   const data = await syliusRequest(REST_METHODS.GET, `/orders/${cartId}`);
-  const syliusCart = data.body;
-  return normalizeCart(syliusCart);
+  return normalizeCart(data.body);
 };
+
 export const addToCart = async (cartId: string | undefined, payload: AddToCartPayload[]) => {
   await syliusRequest(REST_METHODS.POST, `/orders/${cartId}/items`, {
     productVariant: payload[0]?.merchandiseId,
     quantity: payload[0]?.quantity
   });
 };
+
 export const removeFromCart = async (cartId: string, itemIds: string[]) => {
   await syliusRequest(REST_METHODS.DELETE, `/orders/${cartId}/items/${itemIds[0]}`);
 };
@@ -190,11 +185,10 @@ export const updateCart = async (cartId: string, payload: UpdateCartPayload[]) =
 // Site
 export const getMenu = async () => {
   const collections = await getCollections();
+  console.log('📌 Collections dans getMenu:', collections);
+
   return [
-    {
-      title: 'All',
-      path: '/search'
-    },
+    { title: 'All', path: '/search' },
     ...collections.slice(0, 2).map(({ title, path }) => ({ title, path }))
   ];
 };

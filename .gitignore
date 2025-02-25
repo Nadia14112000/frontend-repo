@@ -36,3 +36,16 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+# Ignorer les fichiers de build de Next.js
+.next/
+out/
+node_modules/
+
+# Ignorer les fichiers d'environnement
+.env.local
+.env.production
+.env.development
+
+# Fichiers système
+.DS_Store
+Thumbs.db
